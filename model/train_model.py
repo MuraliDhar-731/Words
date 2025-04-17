@@ -23,11 +23,14 @@ def load_model():
         'syllables': [4, 2, 5, 5, 1],
         'difficulty': ['Medium', 'Easy', 'Hard', 'Medium', 'Easy']
     }
+
     df = pd.DataFrame(data)
     X = df[['length', 'syllables']]
     y = df['difficulty']
+
     model = RandomForestClassifier()
     model.fit(X, y)
+
     return model
 
 
