@@ -47,32 +47,32 @@ def log_retrain_event(word, label, dataset_size):
         log.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] "
                   f"Word added: '{word}' | Label: '{label}' | Dataset size: {dataset_size}\n")
 
-# 🔁 Manual retraining (used by retrain button)
+# 🔁 Manual retraining with optimized models
 def retrain_model(fast_mode=False):
     df = pd.read_csv(CSV_PATH)
-    if fast_mode:
-        model = SGDClassifier(max_iter=1000, tol=1e-3)
-    else:
-        model = RandomForestClassifier()
-
     X = df[['length', 'syllables']]
     y = df['difficulty']
-    model.fit(X, y)
 
-    # Save model to cache (force update on retrain)
-    st.cache_resource.clear()  # 💡 force reload next time
+    if fast_mode:
+        model = SGDClassifier(max_iter=5000, tol=1e-4, learning_rate='adaptive', eta0=0.01)
+    else:
+        model = RandomForestClassifier(n_estimators=300, max_depth=10, n_jobs=-1)
+
+    model.fit(X, y)
+    st.cache_resource.clear()
     return model
 
-# ✅ Cached model loader
+# ✅ Cached loader with optimized models
 @st.cache_resource
 def load_model_cached(fast_mode=False):
     df = pd.read_csv(CSV_PATH)
-    if fast_mode:
-        model = SGDClassifier(max_iter=1000, tol=1e-3)
-    else:
-        model = RandomForestClassifier()
-
     X = df[['length', 'syllables']]
     y = df['difficulty']
+
+    if fast_mode:
+        model = SGDClassifier(max_iter=5000, tol=1e-4, learning_rate='adaptive', eta0=0.01)
+    else:
+        model = RandomForestClassifier(n_estimators=300, max_depth=10, n_jobs=-1)
+
     model.fit(X, y)
     return model
