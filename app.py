@@ -7,6 +7,7 @@ from textstat import syllable_count
 import nltk
 from nltk.tokenize import word_tokenize
 import os
+import pandas as pd
 
 nltk.download('punkt')
 with st.expander("📂 View Predictions for Dataset Words"):
