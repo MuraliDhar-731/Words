@@ -6,7 +6,6 @@ import nltk
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import SGDClassifier
-from sklearn.preprocessing import LabelEncoder
 
 import streamlit as st
 
@@ -15,7 +14,7 @@ nltk.download('averaged_perceptron_tagger')
 CSV_PATH = "data/dummy_dataset.csv"
 HISTORY_LOG_PATH = "data/history.log"
 
-# ✨ Extract features from a word
+# ✨ Feature extraction
 def extract_features(word):
     return {
         'length': len(word),
@@ -23,12 +22,29 @@ def extract_features(word):
         'pos': nltk.pos_tag([word])[0][1]
     }
 
-# 🧠 Predict difficulty
+# 🧠 Predict difficulty using trained model
 def predict_difficulty(model, features):
     vec = [[features['length'], features['syllables']]]
     return model.predict(vec)[0]
 
-# ➕ Add a new word to the dataset
+# ✅ Check if word already exists
+def word_exists_in_dataset(word):
+    if not os.path.exists(CSV_PATH):
+        return False
+    df = pd.read_csv(CSV_PATH)
+    return word.lower() in df["word"].str.lower().values
+
+# 🔍 Get label from existing dataset
+def get_label_from_dataset(word):
+    if not os.path.exists(CSV_PATH):
+        return None
+    df = pd.read_csv(CSV_PATH)
+    row = df[df["word"].str.lower() == word.lower()]
+    if not row.empty:
+        return row.iloc[0]["difficulty"]
+    return None
+
+# ➕ Add new word
 def add_word_to_dataset(word, length, syllables, label):
     if os.path.exists(CSV_PATH):
         df = pd.read_csv(CSV_PATH)
@@ -41,13 +57,13 @@ def add_word_to_dataset(word, length, syllables, label):
         df.to_csv(CSV_PATH, index=False)
         log_retrain_event(word, label, len(df))
 
-# 🕒 Log retrain events
+# 📝 Log each retrain
 def log_retrain_event(word, label, dataset_size):
     with open(HISTORY_LOG_PATH, "a") as log:
         log.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] "
                   f"Word added: '{word}' | Label: '{label}' | Dataset size: {dataset_size}\n")
 
-# 🔁 Manual retraining with optimized models
+# 🔁 Retrain model (manual or auto)
 def retrain_model(fast_mode=False):
     df = pd.read_csv(CSV_PATH)
     X = df[['length', 'syllables']]
@@ -62,7 +78,7 @@ def retrain_model(fast_mode=False):
     st.cache_resource.clear()
     return model
 
-# ✅ Cached loader with optimized models
+# ✅ Cached model loader
 @st.cache_resource
 def load_model_cached(fast_mode=False):
     df = pd.read_csv(CSV_PATH)
