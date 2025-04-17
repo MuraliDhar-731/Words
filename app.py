@@ -10,6 +10,8 @@ from utils.features import (
     load_model_cached,
     retrain_model,
     add_word_to_dataset,
+    word_exists_in_dataset,
+    get_label_from_dataset
 )
 
 from utils.extract_text import get_text_from_url, get_text_from_upload
@@ -67,20 +69,27 @@ if text:
     st.subheader("🔥 Heatmap")
     plot_difficulty_heatmap(filtered_words[:len(difficulties)], difficulties)
 
-# ➕ Add New Word
+# ➕ Add New Word Section (with check)
 with st.expander("➕ Add a new word manually"):
     new_word = st.text_input("Enter word:")
     new_label = st.selectbox("Select difficulty label", ["Easy", "Medium", "Hard"])
-    if st.button("Add & Save"):
-        length = len(new_word)
-        syllables = syllable_count(new_word)
-        add_word_to_dataset(new_word, length, syllables, new_label)
-        st.success(f"'{new_word}' added. You can now retrain manually.")
 
-# 🔁 Retrain Model
+    if st.button("Add & Save"):
+        if word_exists_in_dataset(new_word):
+            label = get_label_from_dataset(new_word)
+            st.success(f"✅ '{new_word}' already exists in the dataset.")
+            st.info(f"📊 Stored Label: `{label}` — no retraining needed.")
+        else:
+            length = len(new_word)
+            syllables = syllable_count(new_word)
+            add_word_to_dataset(new_word, length, syllables, new_label)
+            retrain_model(fast_mode)
+            st.success(f"✅ '{new_word}' added and model retrained.")
+
+# 🔁 Manual Retrain
 if st.button("🔁 Retrain Model Now"):
     retrain_model(fast_mode)
-    st.success("Model retrained!")
+    st.success("✅ Model retrained.")
 
 # 🕒 View History Log
 with st.expander("🕒 Retrain History Log"):
