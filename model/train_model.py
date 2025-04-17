@@ -15,10 +15,20 @@ print("✅ Model trained and saved!")
 
 
 def load_model():
-    try:
-        return joblib.load("model/difficulty_model.pkl")
-    except:
-        from sklearn.ensemble import RandomForestClassifier
-        dummy = RandomForestClassifier()
-        dummy.fit([[1, 1], [10, 4]], ['Easy', 'Hard'])
-        return dummy
+    import pandas as pd
+    from sklearn.ensemble import RandomForestClassifier
+
+    # Dummy data (same as your previous model)
+    data = {
+        'length': [9, 4, 13, 10, 3],
+        'syllables': [4, 2, 5, 5, 1],
+        'difficulty': ['Medium', 'Easy', 'Hard', 'Medium', 'Easy']
+    }
+    df = pd.DataFrame(data)
+    X = df[['length', 'syllables']]
+    y = df['difficulty']
+
+    model = RandomForestClassifier()
+    model.fit(X, y)
+    return model
+
