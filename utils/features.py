@@ -46,7 +46,6 @@ def load_model():
 
     return model
 
-
 nltk.download('averaged_perceptron_tagger')
 
 def extract_features(word):
