@@ -52,3 +52,18 @@ if text:
 
     st.subheader("🔥 Heatmap")
     plot_difficulty_heatmap(filtered_words[:len(difficulties)], difficulties)
+
+
+
+with st.expander("➕ Add a new word manually"):
+    new_word = st.text_input("Enter word:")
+    new_label = st.selectbox("Select difficulty label", ["Easy", "Medium", "Hard"])
+    if st.button("Add & Retrain"):
+        from textstat import syllable_count
+        from utils.features import add_word_to_dataset, load_model
+
+        length = len(new_word)
+        syllables = syllable_count(new_word)
+        add_word_to_dataset(new_word, length, syllables, new_label)
+        model = load_model()
+        st.success(f"'{new_word}' added and model retrained!")
