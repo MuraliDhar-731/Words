@@ -1,41 +1,47 @@
 import streamlit as st
+from utils.features import extract_features, predict_difficulty, load_model_cached, retrain_model, add_word_to_dataset
 from utils.extract_text import get_text_from_url, get_text_from_upload
-from utils.features import extract_features, predict_difficulty, load_model
 from utils.definitions import get_word_info
 from utils.heatmap import plot_difficulty_heatmap
+from textstat import syllable_count
 import nltk
 from nltk.tokenize import word_tokenize
+import os
 
 nltk.download('punkt')
 
-st.set_page_config(page_title="Word Difficulty Predictor", layout="wide")
 st.title("🧠 Word Difficulty Predictor")
-st.write("Upload text or URL and get word difficulty, definitions, examples, and heatmap.")
 
-model = load_model()
+# 🔁 Toggle between fast and accurate model
+mode = st.radio("Choose Model Mode:", ["⚡ Light Mode (Fast)", "🎯 Full Mode (Accurate)"])
+fast_mode = mode == "⚡ Light Mode (Fast)"
 
+# ✅ Load model with cache
+model = load_model_cached(fast_mode)
+
+# 📄 Input Section
 col1, col2 = st.columns(2)
 text = ""
 
 with col1:
-    url = st.text_input("🔗 Enter URL to fetch text:")
-    if st.button("Fetch from URL"):
+    url = st.text_input("🔗 Enter URL")
+    if st.button("Fetch"):
         text = get_text_from_url(url)
 
 with col2:
-    uploaded = st.file_uploader("📄 Upload a .txt file", type=["txt"])
+    uploaded = st.file_uploader("📄 Upload .txt file", type=["txt"])
     if uploaded:
         text = get_text_from_upload(uploaded)
 
 if not text:
-    text = st.text_area("📝 Or paste your own paragraph here:")
+    text = st.text_area("Or paste paragraph here:")
 
+# 📊 Word Prediction
 if text:
-    st.subheader("📊 Word Predictions")
+    st.subheader("📊 Predictions")
     words = word_tokenize(text)
     filtered_words = [w for w in words if w.isalpha()]
-    difficulties = []
-    table = []
+    difficulties, table = [], []
 
     for word in filtered_words[:100]:
         features = extract_features(word)
@@ -53,48 +59,34 @@ if text:
     st.subheader("🔥 Heatmap")
     plot_difficulty_heatmap(filtered_words[:len(difficulties)], difficulties)
 
-
-
+# ➕ Add New Word
 with st.expander("➕ Add a new word manually"):
     new_word = st.text_input("Enter word:")
     new_label = st.selectbox("Select difficulty label", ["Easy", "Medium", "Hard"])
-    if st.button("Add & Retrain"):
-        from textstat import syllable_count
-        from utils.features import add_word_to_dataset, load_model
-
+    if st.button("Add & Save"):
         length = len(new_word)
         syllables = syllable_count(new_word)
         add_word_to_dataset(new_word, length, syllables, new_label)
-        model = load_model()
-        st.success(f"'{new_word}' added and model retrained!")
+        st.success(f"'{new_word}' added. You can now retrain manually.")
+
+# 🔁 Manual Retrain
+if st.button("🔁 Retrain Model Now"):
+    retrain_model(fast_mode)
+    st.success("Model retrained!")
+
+# 🕒 History Viewer with Search
 with st.expander("🕒 Retrain History Log"):
-    try:
-        with open("data/history.log", "r") as f:
-            logs = f.read()
-        st.text(logs)
-    except FileNotFoundError:
-        st.info("No retraining history found yet.")
-
-
-
-with st.expander("🕒 Retrain History Log"):
-    import os
-
     search_query = st.text_input("🔍 Search retrain history (e.g., 'Hard', 'education', '2025')")
-
     if os.path.exists("data/history.log"):
         with open("data/history.log", "r") as f:
             log_lines = f.readlines()
-
         if search_query:
             filtered = [line for line in log_lines if search_query.lower() in line.lower()]
         else:
-            filtered = log_lines[-50:]  # Show only last 50 entries by default
-
+            filtered = log_lines[-50:]
         if filtered:
             st.text("".join(filtered))
         else:
             st.warning("🚫 No matching entries found.")
     else:
         st.info("No retraining history found yet.")
-
