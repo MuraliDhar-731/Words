@@ -7,8 +7,24 @@ import os
 import pickle
 
 def load_model():
-    with open("model/difficulty_model_pickle.pkl", "rb") as f:
-        return pickle.load(f)
+    from sklearn.ensemble import RandomForestClassifier
+    import pandas as pd
+
+    data = {
+        'length': [9, 4, 13, 10, 3],
+        'syllables': [4, 2, 5, 5, 1],
+        'difficulty': ['Medium', 'Easy', 'Hard', 'Medium', 'Easy']
+    }
+
+    df = pd.DataFrame(data)
+    X = df[['length', 'syllables']]
+    y = df['difficulty']
+
+    model = RandomForestClassifier()
+    model.fit(X, y)
+
+    return model
+
 
 nltk.download('averaged_perceptron_tagger')
 
