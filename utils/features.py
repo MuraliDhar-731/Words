@@ -68,3 +68,21 @@ def log_retrain_event(word, label, dataset_size):
 def predict_difficulty(model, features):
     vec = [features['length'], features['syllables']]
     return model.predict([vec])[0]
+
+
+
+def add_word_to_dataset(word, length, syllables, label):
+    if os.path.exists(CSV_PATH):
+        df = pd.read_csv(CSV_PATH)
+    else:
+        df = pd.DataFrame(columns=["word", "length", "syllables", "difficulty"])
+
+    if word.lower() not in df["word"].str.lower().values:
+        new_row = {"word": word, "length": length, "syllables": syllables, "difficulty": label}
+        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+        df.to_csv(CSV_PATH, index=False)
+        log_retrain_event(word, label, len(df))
+        print(f"✅ Added: {word}")
+    else:
+        print(f"⚠️ Word already exists: {word}")
+
