@@ -1,9 +1,10 @@
 streamlit
 scikit-learn
 nltk
+textstat
 requests
 beautifulsoup4
+PyDictionary
 matplotlib
 seaborn
-PyDictionary
-transformers
+joblib
