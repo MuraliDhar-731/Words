@@ -3,6 +3,13 @@ import nltk
 import joblib
 import os
 
+
+import pickle
+
+def load_model():
+    with open("model/difficulty_model_pickle.pkl", "rb") as f:
+        return pickle.load(f)
+
 nltk.download('averaged_perceptron_tagger')
 
 def extract_features(word):
@@ -12,8 +19,6 @@ def extract_features(word):
         'pos': nltk.pos_tag([word])[0][1]
     }
 
-def load_model():
-    return joblib.load("model/difficulty_model.pkl")
 
 def predict_difficulty(model, features):
     vec = [features['length'], features['syllables']]
