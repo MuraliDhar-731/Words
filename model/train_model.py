@@ -15,10 +15,9 @@ print("✅ Model trained and saved!")
 
 
 def load_model():
-    import pandas as pd
     from sklearn.ensemble import RandomForestClassifier
+    import pandas as pd
 
-    # Dummy data (same as your previous model)
     data = {
         'length': [9, 4, 13, 10, 3],
         'syllables': [4, 2, 5, 5, 1],
@@ -27,8 +26,8 @@ def load_model():
     df = pd.DataFrame(data)
     X = df[['length', 'syllables']]
     y = df['difficulty']
-
     model = RandomForestClassifier()
     model.fit(X, y)
     return model
+
 
