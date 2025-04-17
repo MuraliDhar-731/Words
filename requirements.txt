@@ -1,0 +1,9 @@
+streamlit
+scikit-learn
+nltk
+requests
+beautifulsoup4
+matplotlib
+seaborn
+PyDictionary
+transformers

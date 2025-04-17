@@ -1,0 +1,1 @@
+# Word definition functions (placeholder)
