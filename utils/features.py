@@ -3,6 +3,27 @@ import nltk
 import joblib
 import os
 
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+import os
+
+CSV_PATH = "data/dummy_dataset.csv"
+
+def add_word_to_dataset(word, length, syllables, label):
+    # Load existing or create new dataset
+    if os.path.exists(CSV_PATH):
+        df = pd.read_csv(CSV_PATH)
+    else:
+        df = pd.DataFrame(columns=["word", "length", "syllables", "difficulty"])
+
+    # Check if word already exists (optional)
+    if word.lower() not in df["word"].str.lower().values:
+        new_row = {"word": word, "length": length, "syllables": syllables, "difficulty": label}
+        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+        df.to_csv(CSV_PATH, index=False)
+        print(f"✅ Added: {word}")
+    else:
+        print(f"⚠️ Word already exists: {word}")
 
 import pickle
 
