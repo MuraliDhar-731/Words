@@ -55,6 +55,15 @@ def extract_features(word):
         'pos': nltk.pos_tag([word])[0][1]
     }
 
+from datetime import datetime
+
+HISTORY_LOG_PATH = "data/history.log"
+
+def log_retrain_event(word, label, dataset_size):
+    with open(HISTORY_LOG_PATH, "a") as log:
+        log.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] "
+                  f"Word added: '{word}' | Label: '{label}' | Dataset size: {dataset_size}\n")
+
 
 def predict_difficulty(model, features):
     vec = [features['length'], features['syllables']]
