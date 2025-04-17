@@ -1,6 +1,6 @@
 streamlit
 scikit-learn==1.6.1
-nltk
+nltk==3.8.1
 textstat
 requests
 beautifulsoup4
