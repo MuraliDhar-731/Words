@@ -74,3 +74,27 @@ with st.expander("🕒 Retrain History Log"):
         st.text(logs)
     except FileNotFoundError:
         st.info("No retraining history found yet.")
+
+
+
+with st.expander("🕒 Retrain History Log"):
+    import os
+
+    search_query = st.text_input("🔍 Search retrain history (e.g., 'Hard', 'education', '2025')")
+
+    if os.path.exists("data/history.log"):
+        with open("data/history.log", "r") as f:
+            log_lines = f.readlines()
+
+        if search_query:
+            filtered = [line for line in log_lines if search_query.lower() in line.lower()]
+        else:
+            filtered = log_lines[-50:]  # Show only last 50 entries by default
+
+        if filtered:
+            st.text("".join(filtered))
+        else:
+            st.warning("🚫 No matching entries found.")
+    else:
+        st.info("No retraining history found yet.")
+
