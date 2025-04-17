@@ -67,3 +67,10 @@ with st.expander("➕ Add a new word manually"):
         add_word_to_dataset(new_word, length, syllables, new_label)
         model = load_model()
         st.success(f"'{new_word}' added and model retrained!")
+with st.expander("🕒 Retrain History Log"):
+    try:
+        with open("data/history.log", "r") as f:
+            logs = f.read()
+        st.text(logs)
+    except FileNotFoundError:
+        st.info("No retraining history found yet.")
