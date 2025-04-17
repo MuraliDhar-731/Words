@@ -9,6 +9,26 @@ from nltk.tokenize import word_tokenize
 import os
 
 nltk.download('punkt')
+with st.expander("📂 View Predictions for Dataset Words"):
+    search_dataset = st.text_input("🔎 Search word in dataset")
+
+    try:
+        df = pd.read_csv("data/dummy_dataset.csv")
+        model = load_model_cached(fast_mode)
+
+        df["predicted"] = df.apply(
+            lambda row: predict_difficulty(
+                model, {"length": row["length"], "syllables": row["syllables"], "pos": "NN"}
+            ),
+            axis=1
+        )
+
+        if search_dataset:
+            df = df[df["word"].str.contains(search_dataset, case=False)]
+
+        st.dataframe(df[["word", "length", "syllables", "difficulty", "predicted"]])
+    except FileNotFoundError:
+        st.warning("Dataset not found.")
 
 st.title("🧠 Word Difficulty Predictor")
 
